@@ -1,4 +1,4 @@
-# neoniousone_examples
+# neonone_examples
 Example projects for neonious one and low.js for ESP32
 
 
@@ -17,4 +17,4 @@ More information on the neonious one: http://www.neonious.com/
 
 ## Contributing
 
-We are very happy for every person or company who is willing to contribute to low.js and its related products. We will gladly accept any code contribution which helps the cause after an appropriate review. Bug reports and suggestions are also welcome!
+We appreciate every person or company who is willing to contribute to low.js and its related products. We will gladly accept any code contribution which helps the cause after an appropriate review. Bug reports and suggestions are also welcome!
