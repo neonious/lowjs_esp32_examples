@@ -1,0 +1,88 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 18pt;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}
+
+body>div {
+    background: #eeeeff;
+    box-shadow: 0 0 220px 125px #eeeeff;
+    max-width: 790px;
+    border-radius: 30px;
+    padding: 20px;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    color: #8888ff;
+}
+
+.welcome {
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    letter-spacing: 5px;
+}
+
+.header {
+    letter-spacing: 2px;
+    font-size: 18pt;
+    margin-bottom: 25px;
+    margin-top: 40px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.buttons .button {
+    color: black;
+    font-size: 14pt;
+    padding: 25px;
+    flex: 0 0 180px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    transition-duration: 0.4s;
+    margin-bottom: 5px;
+}
+
+.err {
+    border: 3px dashed red;
+    color: red;
+    background-color: white;
+    padding: 20px;
+    display: none;
+}
+
+.buttons .button:hover {
+    box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+}
+
+.buttons .button:active {
+    transition: 0.05s;
+    box-shadow: 0px 0px 0px 0px black;
+}
+
+.button.red {
+    margin-right: 20px;
+    background-color: rgb(255, 107, 107);
+}
+
+.button.green {
+    background-color: rgb(86, 201, 86);
+}
+
+.ssl {
+    font-size: 13pt;
+}
+
+.external td {
+    padding-right: 20px;
+    padding-bottom: 20px;
+}
