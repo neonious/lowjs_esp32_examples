@@ -1,0 +1,64 @@
+<html>
+
+<head>
+    <title>Welcome to neonious one!</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+    <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+        function toggle(type) {
+            $.ajax('/Toggle' + type, { 'timeout': 8000 })
+                .done(function () {
+                    $('.err').hide();
+                })
+                .fail(function () {
+                    $('.err').show();
+                })
+        }
+    </script>
+</head>
+
+<body>
+    <div>
+        <h1 class='welcome'>Welcome to neonious one Technology Preview!</h1>
+        <p class='explain'>This page is served by a JavaScript example program preloaded on your neonious one.</p>
+        <p class='header'>Try out your board:</p>
+        <div class='buttons'>
+            <a href="javascript: toggle('Red')" class='button red'>Toggle Red LED</a>
+            <a href="javascript: toggle('Green')" class='button green'>Toggle Green LED</a>
+        </div>
+        <p class='err'>AJAX request to toggle buttons failed!</p>
+        <p class='header'>Visit the IDE under
+            <a href="/neonious/" class='link'>/neonious/</a> to start hacking!</p>
+        <p class="ssl">If you want it secure, try HTTPS. It is working, but might not with your setup.
+            <br>See manual for an exact explanation on why.
+        </p>
+        <p class='header'>External resources:</p>
+        <table class="external">
+            <tr>
+                <td valign="top">
+                    <a href="http://www.neonious.com/TPManual" target="_blank">http://www.neonious.com/TPManual</a>
+                </td>
+                <td valign="top">Be creative on what to do with this board! But, to know the limits, get educated what you can do with this
+                    board here.
+                </td>
+            </tr>
+            <tr>
+                <td valign="top">
+                    <a href="http://www.neonious.com/Kickstarter" target="_blank">http://www.neonious.com/Kickstarter</a>
+                </td>
+                <td valign="top">Support our Kickstarter, and get the final board with much more possibilities!
+                    <p>Get the neonious 1800x RGB-LED kit to turn the JavaScript power into great animations. Highlighted in
+                        our Kickstarter video!
+                    </p>
+                    <p>Consider the neonious IoT Electronics Kit: The all-in-one package to get you a full IoT electronics education.
+                        Includes over 150 large and small pieces, and a text book with many examples on how to connect them
+                        to develop anything you can imagine.</p>
+                    <p>Or just give a thank you donation to our Kickstarter!</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>
