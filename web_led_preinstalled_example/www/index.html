@@ -1,0 +1,80 @@
+<html>
+
+<head>
+    <title>Welcome to neonious one!</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+    <script type="text/javascript">
+        function toggle(type) {
+            // http://youmightnotneedjquery.com/ is a great resource on how to
+            // make web pages dynamic without jQuery or other additional libraries!
+            document.getElementById('err').style.display = 'none';
+
+            var isDone = false;
+            function done(ok) {
+                if (isDone)
+                    return;
+                isDone = true;
+
+                if (!ok)
+                    document.getElementById('err').style.display = '';
+            }
+
+            var request = new XMLHttpRequest();
+            request.open('GET', '/Toggle' + type, true);
+            request.onload = function () {
+                done(this.status >= 200 && this.status < 400);
+            };
+            request.onerror = function () {
+                done(false);
+            };
+            setTimeout(function () {
+                done(false);
+            }, 8000);
+            request.send();
+        }
+    </script>
+</head>
+
+<body>
+    <div>
+        <h1 class='welcome'>Welcome to neonious one!</h1>
+        <p class='explain'>This page is served by a JavaScript example program preloaded on your neonious one.</p>
+        <p class='header'>Try out your board:</p>
+        <div class='buttons'>
+            <a href="javascript: toggle('Red')" class='button red'>Toggle Red LED</a>
+            <a href="javascript: toggle('Green')" class='button green'>Toggle Green LED</a>
+        </div>
+        <p id='err' style="display: none">AJAX request to toggle buttons failed!</p>
+        <p id='header' style="display: none">Visit the IDE under
+            <a id="ideLink" href="#" class='link'>?</a> to modify this program!</p>
+        <p id='headerSSL' style="display: none">Or, go to <a id="ideLinkSSL" href="#" class='link'>?</a> for HTTPS-secured
+            access!
+            <br> Slightly slower, with certificate warning because this device does not have a domain, but secure nonetheless.
+        </p>
+        <p class='header'>External resources:</p>
+        <table class="external">
+            <tr>
+                <td valign="top">
+                    <a href="https://www.neonious.com/Documentation" target="_blank">https://www.neonious.com/Documentation</a>
+                </td>
+                <td valign="top">Be creative on what to do with this board! Get educated what you
+                    can do with this board here.
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script type="text/javascript">
+        if (location.hostname) {
+            document.getElementById('ideLink').href = 'http://' + location.hostname + ':8000/';
+            document.getElementById('ideLink').innerHTML = 'http://' + location.hostname + ':8000/';
+            document.getElementById('ideLinkSSL').href = 'https://' + location.hostname + ':8443/';
+            document.getElementById('ideLinkSSL').innerHTML = 'https://' + location.hostname + ':8443/';
+            document.getElementById('header').style.display = '';
+            document.getElementById('headerSSL').style.display = '';
+        } else
+            console.log("Cannot detect host name, maybe running from local?");
+    </script>
+</body>
+
+</html>
