@@ -9,7 +9,7 @@ JS files in /www/ run in the browser, not on neonious one.
 
 The official documentation of the board can be found at
 
-    https://www.neonious.com/docs/
+    https://www.neonious.com/Documentation
 
 For any questions, we are happy to help you! Contact us at info@neonious.com at
 any time.
