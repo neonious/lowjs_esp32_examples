@@ -3,13 +3,16 @@
  * 
  * This program shows how to interface an OLED display with the ssd1306 or sh1106
  * driver chip via SPI
+ * 
+ * Note: SPI is still slow on the neonious one, as the link to the LPC822
+ *       is not fast. But this will be fixed very soon.
  */
 
 let spi = require('spi');
 let gpio = require('gpio');
 
 // In case this is not a ssd1306 but a sh1106, they sometimes add an offset
-// Try to set this to 2, if the display looks shifted
+// Try to set this to 2, if the display has some uninitialized lines left
 const SSHD1306_COLUMN_OFFSET = 0;
 
 // Commands
@@ -41,15 +44,14 @@ const SSD1306_SWITCHCAPVCC = 0x2;
 
 const SSD1306_VCCSTATE = SSD1306_INTERNALVCC;
 
-class OLEDDisplay extends spi.SPI {
-    constructor(channel, options) {
-        this._width = options.width;
-        this._height = options.height;
-        this._buffer = new Buffer(this._width * this._height / 8);
-        this._pinDC = options.pinDC;
-
-        super(channel, options);
-        this.resume();  // consume output
+class OLEDDisplay {
+    constructor(spi, options) {
+    	this.spi = spi;
+        this.width = options.width;
+        this.height = options.height;
+        this.buffer = new Buffer(this.width * this.height / 8);
+        this.pinDC = options.pinDC;
+        this.pinCS = options.pinCS;
 
         gpio.pins[options.pinDC].setType(gpio.OUTPUT);
         gpio.pins[options.pinDC].setValue(0);
@@ -65,7 +67,7 @@ class OLEDDisplay extends spi.SPI {
             buf[bufPos++] = byte;
         }
 
-        if (this._width == 64 && this._height == 48) {
+        if (this.width == 64 && this.height == 48) {
             // Init sequence taken from SFE_MicroOLED.cpp
             spi_byte(SSD1306_DISPLAYOFF);         // 0xAE
             spi_byte(SSD1306_SETDISPLAYCLOCKDIV); // 0xD5
@@ -89,7 +91,7 @@ class OLEDDisplay extends spi.SPI {
             spi_byte(0xF1);
             spi_byte(SSD1306_SETVCOMDETECT); // 0xDB
             spi_byte(0x40);
-        } else if (this._width == 128 && this._height == 32) {
+        } else if (this.width == 128 && this.height == 32) {
             // Init sequence taken from datasheet for UG-2832HSWEG04 (128x32 OLED module)
             spi_byte(SSD1306_DISPLAYOFF);         // 0xAE
             spi_byte(SSD1306_SETDISPLAYCLOCKDIV); // 0xD5
@@ -122,13 +124,13 @@ class OLEDDisplay extends spi.SPI {
             spi_byte(0x40);
             spi_byte(SSD1306_DISPLAYALLON_RESUME); // 0xA4
             spi_byte(SSD1306_NORMALDISPLAY);       // 0xA6
-        } else if (this._width == 128 && this._height == 64) {
+        } else if (this.width == 128 && this.height == 64) {
             // Init sequence taken from datasheet for UG-2864HSWEG01 (128x64 OLED module)
             spi_byte(SSD1306_DISPLAYOFF);         // 0xAE
             spi_byte(SSD1306_SETDISPLAYCLOCKDIV); // 0xD5
             spi_byte(0x80);                       // the suggested ratio 0x80
             spi_byte(SSD1306_SETMULTIPLEX);       // 0xA8
-            spi_byte(this._height - 1);
+            spi_byte(this.height - 1);
             spi_byte(SSD1306_SETDISPLAYOFFSET);   // 0xD3
             spi_byte(0x0);                        // no offset
             spi_byte(SSD1306_SETSTARTLINE | 0x0); // line #0
@@ -160,33 +162,32 @@ class OLEDDisplay extends spi.SPI {
 
         // Enable the OLED panel
         spi_byte(SSD1306_DISPLAYON);
-
-        this.write(buf.slice(0, bufPos));
+        this.spi.transfer(this.pinCS, buf.slice(0, bufPos));
     }
 
     apply(callback) {
         let buf = new Buffer(1);
         buf[0] = SSD1306_SETSTARTLINE | 0x0; // line #0
-        this.write(buf);
+        this.spi.transfer(this.pinCS, buf);
         buf = new Buffer(3);
 
         let i = 0;
         let row = (y) => {
-            if (y == (this._height >> 3))
+            if (y == (this.height >> 3))
                 return callback();
 
             buf[0] = SSD1306_SETPAGEADDRESS | y;
             buf[1] = SSD1306_SETLOWCOLUMN | (SSHD1306_COLUMN_OFFSET & 0xf); // low col = 0
             buf[2] = SSD1306_SETHIGHCOLUMN | (SSHD1306_COLUMN_OFFSET >> 4); // hi col = 0
-            this.write(buf);
+            this.spi.transfer(this.pinCS, buf);
 
-            this.flush(() => {
-                gpio.pins[this._pinDC].setValue(1);
-                this.write(this._buffer.slice(i, i + this._width));
-                i += this._width;
+            this.spi.flush(() => {
+                gpio.pins[this.pinDC].setValue(1);
+                this.spi.transfer(this.pinCS, this.buffer.slice(i, i + this.width));
+                i += this.width;
 
-                this.flush(() => {
-                    gpio.pins[this._pinDC].setValue(0);
+                this.spi.flush(() => {
+                    gpio.pins[this.pinDC].setValue(0);
                     row(y + 1);
                 });
             });
@@ -195,27 +196,32 @@ class OLEDDisplay extends spi.SPI {
     }
 
     clearAll(byte) {
-        for (let i = 0; i < this._buffer.length; i++)
-            this._buffer[i] = byte;
+        for (let i = 0; i < this.buffer.length; i++)
+            this.buffer[i] = byte;
     }
 
     // simple pixel set functions
     clear(x, y) {
-        this._buffer[x + (y >> 3) * this._width] &= ~(1 << (y & 0x07));
+        this.buffer[x + (y >> 3) * this.width] &= ~(1 << (y & 0x07));
     }
 
     set(x, y) {
-        this._buffer[x + (y >> 3) * this._width] |= 1 << (y & 0x07);
+        this.buffer[x + (y >> 3) * this.width] |= 1 << (y & 0x07);
     }
 }
 
-let display = new OLEDDisplay(1, {
-    pinSCLK: 23,
-    pinMOSI: 22,
+let spi = new spi.SPI({
+    pinSCLK: 19,
+    pinMOSI: 23
+});
+spi.addCS(18);
+
+let display = new OLEDDisplay(spi, {
+    width: 128,
+    height: 64,
     pinRES: 21,
     pinDC: 20,
-    width: 128,
-    height: 64
+    pinCS: 18
 });
 
 let led = true;
@@ -225,8 +231,6 @@ let dx = 2, dy = 2;
 
 display.clearAll(0);
 function frame() {
-    process.gc();   // still needed in 1.1.0
-
     led = !led;
     gpio.pins[gpio.LED_GREEN].setValue(led);
     gpio.pins[gpio.LED_RED].setValue(!led);
