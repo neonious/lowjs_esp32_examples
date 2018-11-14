@@ -4,11 +4,12 @@
 //	tableradar - /src/index.js
 //	Written by Thomas Rogg <thomas@neonious.com>, public domain
 //
-//	Example program for neonious one Technology Preview
+//	Example program for neonious one
 //	More information: http://www.neonious.com/
 //
 //  05/25/2018 - initial version
 //  09/05/2018 - changes for program to work with neonious one software v1.1.0
+//  11/14/2018 - added note that process.gc is no longer really needed
 // -----------------------------------------------------------------------------
 
 let http = require('http');
@@ -44,8 +45,7 @@ let angle = 0, dir = 1;
 // calls itself when both is done
 function radarStep() {
 	// Explicitly call garbage collector to keep animation smooth
-	// (we plan on making garbage collection better, to remove the need
-	// for this)
+	// (not really needed in newer versions of low.js)
 	if(process && process.gc)
 		process.gc();
 	else

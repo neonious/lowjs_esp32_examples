@@ -8,12 +8,14 @@
  *       is not fast. But this will be fixed very soon.
  */
 
-let spi = require('spi');
-let gpio = require('gpio');
-
-// In case this is not a ssd1306 but a sh1106, they sometimes add an offset
+// **** IMPORTANT ****
+// In case this is not a ssd1306 but a sh1106, the left most pixel is sometimes
+// the pixel with the x coordinate 2 (everything shifted by 2 pixels)
 // Try to set this to 2, if the display has some uninitialized lines left
 const SSHD1306_COLUMN_OFFSET = 0;
+
+let spi = require('spi');
+let gpio = require('gpio');
 
 // Commands
 const SSD1306_SETCONTRAST = 0x81;
@@ -226,25 +228,27 @@ let display = new OLEDDisplay(spi, {
 
 let led = true;
 
-let x = 7, y = 5;
-let dx = 2, dy = 2;
-
 display.clearAll(0);
 function frame() {
     led = !led;
     gpio.pins[gpio.LED_GREEN].setValue(led);
     gpio.pins[gpio.LED_RED].setValue(!led);
 
-    display.set(x, y);
-    display.set(x, y + 1);
-    display.set(x + 1, y);
-    display.set(x + 1, y + 1);
-    x += dx;
-    y += dy;
-    if (x >= 127)
-        x = 0;
-    if (y >= 63)
-        y = 0;
+    for(let i = 0; i < 10; i++) {
+        let x = (Math.random() * 127) | 0;
+        let y = (Math.random() * 63) | 0;
+        display.set(x, y);
+        display.set(x, y + 1);
+        display.set(x + 1, y);
+        display.set(x + 1, y + 1);
+
+        x = (Math.random() * 127) | 0;
+        y = (Math.random() * 63) | 0;
+        display.clear(x, y);
+        display.clear(x, y + 1);
+        display.clear(x + 1, y);
+        display.clear(x + 1, y + 1);
+    }
 
     display.apply(() => {
         frame();
