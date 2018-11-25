@@ -14,7 +14,7 @@
 // Try to set this to 2, if the display has some uninitialized lines left
 const SSHD1306_COLUMN_OFFSET = 0;
 
-let spi = require('spi');
+let spiMod = require('spi');
 let gpio = require('gpio');
 
 // Commands
@@ -212,7 +212,7 @@ class OLEDDisplay {
     }
 }
 
-let spi = new spi.SPI({
+let spi = new spiMod.SPI({
     pinSCLK: 19,
     pinMOSI: 23
 });
