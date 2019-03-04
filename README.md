@@ -1,5 +1,5 @@
-# neonone_examples
-Example projects for neonious one and low.js for ESP32
+# lowjs_esp32_examples
+Example projects and drivers for neonious one and low.js for ESP32
 
 
 ## What are the noenious one and low.js for ESP32?
