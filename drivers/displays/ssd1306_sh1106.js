@@ -1,5 +1,5 @@
 /*
- * oled_ssd1306_sh1106.js
+ * ssd1306_sh1106.js
  * 
  * This program shows how to interface an OLED display with the ssd1306 or sh1106
  * driver chip via SPI
@@ -7,8 +7,8 @@
  * Note: SPI via LPC822 is still slow on the neonious one, as the link to the
  *       LPC822 is not fast. Will be fixed soon. Till then, use the ESP32 pins
  *       of the neonious one for SCLK and MOSI for faster screen refreshes!
- *		 (you must remove the pinCS line in this case, and connect CS of OLED
- *       module to ground, as there are only 2 ESP32 output pins available on
+ *		 (you must remove the line 230 (pinCS option) in this case, and connect CS
+ *       of OLED module to ground, as there are only 2 ESP32 output pins available on
  *       neonious one).
  */
 
