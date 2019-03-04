@@ -37,9 +37,8 @@
  */
 
 const gpio = require('gpio');
-const EventEmitter = require('events');
 
-class HC_SR04 extends EventEmitter {
+class HC_SR04 {
 	/*
 	 * constructor
 	 * Sets up pins
