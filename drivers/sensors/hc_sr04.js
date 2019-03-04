@@ -105,7 +105,7 @@ class HC_SR04 {
      * callback(err, dist)
      * - err    an error if no distance could be measured (always retries)
      * - dist    the distance in cm if err is null
-     * waitMS    time to wait between measurements
+     * waitMS    time to wait between measurements (default: 200 ms)
      */
     start(callback, waitMS) {
         if(this._callback)
