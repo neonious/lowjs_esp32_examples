@@ -9,8 +9,8 @@
  *
  * *** HOW TO CONNECT ***
  *
- * The device is 5 V only, but as it accepts a 3.3 V signal in we can still connect
- * it directly to the neonious one:
+ * The device is 5 V only, but as it accepts a 3.3 V signal we can still connect it
+ * directly to the neonious one:
  *
  * GND        connect to GND
  * VCC        connect to 5 V (VIN of neonious one if powered from USB)
