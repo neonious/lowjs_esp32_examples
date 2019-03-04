@@ -13,7 +13,7 @@
  * it directly to the neonious one:
  *
  * GND		connect to GND
- * VCC		connect to 5 V (VIN of neonious one if powered to USB)
+ * VCC		connect to 5 V (VIN of neonious one if powered from USB)
  * Trigger	connect to any GPIO pin
  * Echo		connect to 5 V tolerate pin (4 and 5 on neonious one)
  *
