@@ -1,0 +1,87 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    background: #eeeeff;
+}
+
+.wrapper {
+    width: 80%;
+    max-width: 790px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 30px;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    color: #8888ff;
+}
+
+.header {
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    font-size: 24px;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 30px auto;
+    width: 300px;
+}
+
+.button {
+    padding: 25px;
+    flex: 0 0 auto;
+    font-size: 18px;
+    color: black;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    transition-duration: 0.4s;
+}
+
+.button:hover {
+    box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+}
+
+.button:active {
+    transition: 0.05s;
+    box-shadow: 0px 0px 0px 0px black;
+}
+
+.button.red {
+
+    background-color: rgb(255, 107, 107);
+}
+
+.button.green {
+    background-color: rgb(86, 201, 86);
+}
+
+.button.blue {
+    background-color: blue;
+    color: white;
+}
+
+.button + .button {
+    margin-top: 20px;
+}
+
+.external {
+    display: flex;
+    justify-content: center;
+    margin: 20px auto;
+}
+
+.external a {
+    margin: auto 20px;
+    font-size: 12px;
+    color: #999;
+}

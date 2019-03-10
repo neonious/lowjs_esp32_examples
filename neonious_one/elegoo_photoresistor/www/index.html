@@ -1,0 +1,28 @@
+<html>
+
+<head>
+    <title>Multi-sensor</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="wrapper">
+        <p class='header'>Commands:</p>
+        <div class='buttons'>
+            <button id="buttonGetLuminosity" class='button blue'>Get Luminosity</button>
+            <button id="buttonPlotLuminosity" class='button blue'>Plot Luminosity</button>
+        </div>
+        <div style="position: relative; height:200px; width:600px; margin: 0 auto;">
+            <canvas id="canvasPlotLuminosity" width="600" height="200"></canvas>
+        </div>
+    </div>
+    <div class="external">
+        <a href="/neonious" target="_blank">IDE Editor</a>
+        <a href="http://www.neonious.com/TPManual" target="_blank">Manual</a>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js" integrity="sha256-MZo5XY1Ah7Z2Aui4/alkfeiq3CopMdV/bbkc/Sh41+s=" crossorigin="anonymous"></script>
+    <script src="script.js" type="text/javascript"></script>
+</body>
+
+</html>
