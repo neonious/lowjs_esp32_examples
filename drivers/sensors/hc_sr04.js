@@ -1,3 +1,5 @@
+'use strict';
+
 /*
  * A module to interface the HC-SR04 distance sensor module
  * 
