@@ -70,13 +70,13 @@ class NMEA_GPS extends uart.UART {
         }, 10000);
 
         let iface = readline.createInterface({input: this});
-        iface.on('error', this.emit.bind(this));
+        iface.on('error', (e) => { this.emit('error', e); });
         iface.on('line', this._handleLine.bind(this));
-    }
 
-    destroy() {
-        clearTimeout(this._noNMEATimeout);
-        super.destroy(error);
+        this.on('close', () => {
+            clearTimeout(this._noNMEATimeout);
+            iface.close();
+        });
     }
 
     _handleLine(line) {
