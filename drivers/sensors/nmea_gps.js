@@ -15,7 +15,6 @@
  * *** HOW TO USE ***
  *
  * const NMEA_GPS = require('./nmea_gps.js');
- * const lowsys = require('lowsys');
  * 
  * let sensor = new NMEA_GPS({
  *     setSystemTime: true,            // sets system time to GPS time
@@ -24,21 +23,23 @@
  *     // also, add other options for UART module if needed
  * // when done, call sensor.destroy();
  * 
- * sensor.on('gps', (date, pos, speed, height, quality, numSatellites) => {
- *     if(date !== null)
- *         console.log('Time:         ', date);
- *     if(pos !== null)
+ * sensor.on('gps', (time, pos, speed, height, quality, numSatellites) => {
+ *     if(time !== null)
+ *         console.log('Time:         ', time);     // time is a Date or null
+ *     if(pos !== null)                             // pos.lat and pos.lon are numbers or null
  *         console.log('Position:     ', NMEA_GPS.lat2txt(pos.lat), NMEA_GPS.lon2txt(pos.lon));
- *     if(height !== null)
+ *     if(height !== null)                          // height is number or null
  *         console.log('Height:       ', height, ' m above sea level');
- *     if(speed !== null)
+ *     if(speed !== null)                           // speed is number or null
  *         console.log('Speed:        ', speed, ' km/h over ground');
  * 
+ *     // quality is integer, see quality2txt
  *     console.log('Quality:      ', NMEA_GPS.quality2txt(quality));
+ *     // numSatellites is integer
  *     console.log('# Satellites: ', numSatellites);
  * });
  * sensor.on('no-nmea', () => {
- *     console.log('Please check connection to module')
+ *     console.log('Timeout, please check connection to module')
  * });
  * 
  */
@@ -48,13 +49,20 @@ const readline = require('readline');
 const lowsys = require('lowsys');
 
 class NMEA_GPS extends uart.UART {
-    current = {pos: null, speed: null, height: null};
-
     /*
      * constructor
      */
     constructor(options) {
         super(options);
+
+        this.current = {
+            time: null,
+            pos: null,
+            speed: null,
+            height: null,
+            quality: 0,
+            numSatellites: 0
+        };
         this._setSystemTime = options ? !!options.setSystemTime : false;
 
         this._noNMEATimeout = setTimeout(() => {
@@ -68,7 +76,7 @@ class NMEA_GPS extends uart.UART {
 
     destroy() {
         clearTimeout(this._noNMEATimeout);
-        super.destroy(error)
+        super.destroy(error);
     }
 
     _handleLine(line) {
@@ -92,7 +100,6 @@ class NMEA_GPS extends uart.UART {
         line = line.split(',');
         if(line[0] == '$GPGGA') {
             current = Object.assign({}, this.current);
-            current.time = line[1];
 
             if(line[2] && line[4]) {
                 let val;
@@ -112,18 +119,55 @@ class NMEA_GPS extends uart.UART {
                 current.pos = {lat, lon};
             } else
                 current.pos = null;
-
             current.height = line[9] !== '' ? line[9] * 1 : null;
 
-            current.quality = line[6];
-            current.numSatellites = line[7];
+            current.quality = line[6] | 0;
+            current.numSatellites = line[7] | 0;
+
+            if(this.current.pos != current.pos && (!this.current.pos || !current.pos
+                || this.current.pos.lat != current.pos.lat || this.current.pos.lon != current.pos.lon)
+            || this.current.height != current.height
+            || this.current.quality != current.quality
+            || this.current.numSatellites != current.numSatellites) {
+                this.current = current;
+                this.emit('gps',
+                    current.time,
+                    current.pos,
+                    current.speed,
+                    current.height,
+                    current.quality,
+                    current.numSatellites);
+            }
         }
         if(line[0] == '$GPRMC') {
             current = Object.assign({}, this.current);
-            current.time = line[1];
-            current.date = line[9];
 
-            if(line[2] && line[4]) {
+            let time = line[1];
+            let date = line[9];
+            if(time !== '' && date !== '') {
+                let secs = parseFloat(time.substr(4));
+                current.time = new Date(Date.UTC(
+                    2000 + (date.substr(4, 2) | 0),
+                    (date.substr(2, 2) | 0) - 1,
+                    date.substr(0, 2) | 0,
+                    time.substr(0, 2) | 0,
+                    time.substr(2, 2) | 0,
+                    secs | 0,
+                    (secs - (secs | 0)) * 1000
+                ));
+
+                if(this._setSystemTime) {
+                    let diff = current.time.getTime() - new Date().getTime();
+                    // Only change if more than 10s deviation to not break
+                    // any timing loops in the user program
+                    if(!this._firstSet || diff < -10000 || diff > 10000) {
+                        lowsys.setSystemTime(current.time);
+                        this._firstSet = true;
+                    }
+                }
+            } else
+                current.time = null;
+            if(line[3] && line[5]) {
                 let val;
 
                 val = line[3];
@@ -143,44 +187,21 @@ class NMEA_GPS extends uart.UART {
                 current.pos = null;
 
             current.speed = line[7] !== '' ? line[7] * 1.852 : null;
-        }
-
-        if(current
-        && (this.current.date != current.date || this.current.time != current.time
-        || this.current.pos != current.pos || (current.pos &&
-          (this.current.pos.lat != current.pos.lat || this.current.pos.lon != current.pos.lon))
-        || this.current.speed != current.speed || this.current.height != current.height
-        || this.current.quality != current.quality || this.current.numSatellites != current.numSatellites)) {
-            this.current = current;
-
-            let date;
-            if(current.date && current.time) {
-                let secs = parseFloat(current.time.substr(4));
-                date = new Date(Date.UTC(
-                    2000 + (current.date.substr(4, 2) | 0),
-                    (current.date.substr(2, 2) | 0) - 1,
-                    current.date.substr(0, 2) | 0,
-                    current.time.substr(0, 2) | 0,
-                    current.time.substr(2, 2) | 0,
-                    secs | 0,
-                    (secs - (secs | 0)) * 1000
-                ));
-
-                if(this._setSystemTime) {
-                    let diff = date.getTime() - new Date().getTime();
-                    // Only change if more than 10s deviation to not break
-                    // any timing loops in the user program
-                    if(!this._firstSet || diff < -10000 || diff > 10000) {
-                        lowsys.setSystemTime(date);
-                        this._firstSet = true;
-                    }
-                }
-            } else
-                date = null;
-
-            this.emit('gps', date,
-                current.pos, current.speed, current.height,
-                current.quality | 0, current.numSatellites | 0);
+    
+            if(this.current.time != current.time && (!this.current.time || !current.time
+                || this.current.time.getTime() != current.time.getTime())
+            || this.current.pos != current.pos && (!this.current.pos || !current.pos
+                || this.current.pos.lat != current.pos.lat || this.current.pos.lon != current.pos.lon)
+            || this.current.speed != current.speed) {
+                this.current = current;
+                this.emit('gps',
+                    current.time,
+                    current.pos,
+                    current.speed,
+                    current.height,
+                    current.quality,
+                    current.numSatellites);
+            }
         }
     }
 }
