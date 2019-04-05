@@ -1,0 +1,135 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style type="text/css">
+* {
+	margin: 0;
+	padding: 0;
+	background-color: black;
+    overflow: hidden;
+}
+canvas {
+	width: 100%;
+	height: 100%;
+}
+</style>
+<title>Controller</title>
+</head>
+<body>
+<canvas id="controller" width="300" height="300">
+</canvas>
+</body>
+<script type="text/javascript">
+var loc = window.location;
+var wss = new WebSocket((loc.protocol === "https:" ? "wss://" : "ws://") + loc.host + "/coords");
+
+let lastText, lastSend, sendTimeout;
+
+// Send the coordinates, but limit sending to one message every 30 ms
+// to make sure we are not building up a queue which adds latency
+function send(txt) {
+    let now = new Date().getTime();
+    if(lastSend === undefined || now - lastSend >= 30) {
+        try {
+            wss.send(txt);
+            lastSend = new Date().getTime();
+            return;
+        } catch(e) {
+            console.log(e);
+        }
+    }
+
+    lastText = txt;
+    if(!sendTimeout) {
+        let ms = lastSend !== undefined ? 30 - (now - lastSend) : 30;
+        if(ms < 0)
+            ms = 0;
+        sendTimeout = setTimeout(() => {
+            sendTimeout = null;
+            send(lastText);
+        }, ms);
+    }
+}
+
+// Draw the canvas
+function redraw(x, y) {
+	let controller = document.getElementById('controller');
+    controller.width = window.innerWidth;
+    controller.height = window.innerHeight;
+
+	let context = controller.getContext("2d");
+	context.fillStyle = "black";
+	context.fillRect(0, 0, controller.width, controller.height);
+	context.strokeStyle = "grey";
+	context.beginPath();
+	context.moveTo(0, controller.height / 2);
+	context.lineTo(controller.width, controller.height / 2);
+	context.stroke();
+	context.beginPath();
+	context.moveTo(controller.width / 2, 0);
+	context.lineTo(controller.width / 2, controller.height);
+	context.stroke();
+
+    if(x != undefined) {
+        let r = controller.width / 10;
+        if(r > controller.height / 10)
+            r = controller.height / 10;
+
+    	context.fillStyle = "red";
+        context.beginPath();
+        context.arc(x, y, r, 0, 2 * Math.PI);
+        context.fill();
+
+        x = (x - controller.width / 2) / (controller.width / 2 * 0.8);
+        y = -(y - controller.height / 2) / (controller.height / 2 * 0.8);
+        send(JSON.stringify({x: x, y: y}));
+    } else
+        send(JSON.stringify({x: 0, y: 0}));
+}
+redraw();
+window.addEventListener('resize', redraw);
+
+// Handle touch events by mapping them to mouse events
+function touch2Mouse(e) {
+  var theTouch = e.changedTouches[0];
+  var mouseEv;
+
+  switch(e.type)
+  {
+    case "touchstart": mouseEv="mousedown"; break;  
+    case "touchend":   mouseEv="mouseup"; break;
+    case "touchmove":  mouseEv="mousemove"; break;
+    default: return;
+  }
+
+  var mouseEvent = document.createEvent("MouseEvent");
+  mouseEvent.initMouseEvent(mouseEv, true, true, window, 1, theTouch.screenX, theTouch.screenY, theTouch.clientX, theTouch.clientY, false, false, false, false, 0, null);
+  theTouch.target.dispatchEvent(mouseEvent);
+
+  e.preventDefault();
+}
+
+// The { passive: false } is required so iPhone Safari does not scroll the page while dragging
+document.addEventListener("touchstart", touch2Mouse, { passive: false });
+document.addEventListener("touchmove", touch2Mouse, { passive: false });
+document.addEventListener("touchend", touch2Mouse, { passive: false });
+
+// Handle mouse events
+var pressed = false;
+document.addEventListener("mousedown", (e) => {
+    pressed = true;
+    redraw(e.clientX, e.clientY);
+});
+document.addEventListener("mousemove", (e) => {
+    if(!pressed)
+        return;
+    redraw(e.clientX, e.clientY);
+});
+document.addEventListener("mouseup", (e) => {
+    if(!pressed)
+        return;
+    pressed = false;
+    redraw();
+});
+</script>
+</html>
