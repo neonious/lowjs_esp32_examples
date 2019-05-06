@@ -43,13 +43,13 @@ function failed(e) {
 }
 
 intf.on('error', (e) => {
-    console.log('error: ' + e);
+    failed('error: ' + e);
 });
 intf.on('rxMissed', () => {
-    console.log('rx queue full');
+    failed('rx queue full');
 });
 intf.on('arbLost', () => {
-    console.log('arbitration lost, should only happen with one shot messages');
+    failed('arbitration lost, should only happen with one shot messages');
 });
 intf.on('stateChanged', () => {
     if(intf.state == can.STATE_ERR_PASSIVE)
