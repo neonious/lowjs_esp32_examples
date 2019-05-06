@@ -73,4 +73,4 @@ intf.on('message', (data, id, id_len, flags) => {
 });
 
 // Send a message
-intf.trasmit(Buffer.from("hello!"), 123, 11, can.RECV_SELF);
+intf.trasmit(Buffer.from("hello!"), MY_ID, MY_ID_LEN, can.RECV_SELF);
