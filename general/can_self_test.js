@@ -21,55 +21,55 @@ const MY_ID_LEN = 11;	// 11 or 29
 // Setup CAN peripherial
 let can = require('can');
 let intf = new can.CAN({
-	mode: can.MODE_NO_ACK,		// do not wait for ACK
+    mode: can.MODE_NO_ACK,		// do not wait for ACK
     pinRX: PIN_RX,
     pinTX: PIN_TX,
-	filter: {id: MY_ID, id_len: MY_ID_LEN}
+    filter: {id: MY_ID, id_len: MY_ID_LEN}
 });
 
 // Handle everything which can go wrong
 let timer = setTimeout(() => {
-	failed('timed out');
+    failed('timed out');
 }, 5000);
 
 function failed(e) {
-	if(timer) {
-		clearTimeout(timer);
-		timer = null;
-	}
-	intf.unref();	// make program exit
+    if(timer) {
+        clearTimeout(timer);
+        timer = null;
+    }
+    intf.unref();	// make program exit
 
-	console.log('Failed: ', e);
+    console.log('Failed: ', e);
 }
 
 intf.on('error', (e) => {
     console.log('error: ' + e);
 });
 intf.on('rxMissed', () => {
-	console.log('rx queue full');
+    console.log('rx queue full');
 });
 intf.on('arbLost', () => {
-	console.log('arbitration lost, should only happen with one shot messages');
+    console.log('arbitration lost, should only happen with one shot messages');
 });
 intf.on('stateChanged', () => {
-    if(intf.state == 1)
-		failed('state changed to passive');
-    else if(intf.state == 2)
-		failed('state changed to bus-off');
+    if(intf.state == can.STATE_ERR_PASSIVE)
+        failed('state changed to passive');
+    else if(intf.state == can.STATE_BUS_OFF)
+        failed('state changed to bus-off. You have to call intf.recover()');
 });
 
 intf.on('message', (data, id, id_len, flags) => {
-	if(data.toString() == 'hello!' && id == MY_ID && id_len == MY_ID_LEN) {
-		// We have the message
-		if(timer) {
-			clearTimeout(timer);
-			timer = null;
-		}
-		intf.unref();	// make program exit
+    if(data.toString() == 'hello!' && id == MY_ID && id_len == MY_ID_LEN) {
+        // We have the message
+        if(timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+        intf.unref();	// make program exit
 
-		console.log('Success, sent and received messsage!');
-	} else
-		failed('message received is different than sent')
+        console.log('Success, sent and received messsage!');
+    } else
+        failed('message received is different than sent')
 });
 
 // Send a message
