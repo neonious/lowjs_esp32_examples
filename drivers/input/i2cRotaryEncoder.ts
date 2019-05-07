@@ -88,6 +88,7 @@ export class i2cRotaryEncoder {
     public BTN_PUSH=1;
     public BTN_RELEASE=2;
     public ROTATED=4;
+    public READY=8;
 
     constructor(gpio: any, i2c: any,
                 i2cAddr: number, pinINT: number, cb) {
@@ -227,6 +228,8 @@ export class i2cRotaryEncoder {
                     this.getRotaryPos((re: ic2RotaryEncoderEvent)=>{
                        cb(re);
                     });
+                } else {
+                    cb({ event: this.READY, value: 0 });
                 }
             }
         });
