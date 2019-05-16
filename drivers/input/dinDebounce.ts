@@ -9,7 +9,7 @@
  
  // Argument: PIN Number, Debouncevalue in ms, callback function
  
- let myinput=new din(27,gpio.INPUT,200,(pinValue)=> {
+ let myinput=new dinDebounce(27,gpio.INPUT,200,(pinValue)=> {
     console.log('New debounced pin state: '+pinValue);
  });
  
