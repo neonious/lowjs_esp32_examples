@@ -7,15 +7,17 @@
  **** HOW TO USE IT ***
  let gpio = require('gpio');
  
- // Argument: PIN Number, Debouncevalue in ms, callback function
+ import { dinDebounce } from "./dinDebounce";
  
+ // Argument: PIN Number, Debouncevalue in ms, callback function
+
  let myinput=new dinDebounce(27,gpio.INPUT,200,(pinValue)=> {
     console.log('New debounced pin state: '+pinValue);
  });
  
  */
 
-class dinDebounce {
+export class dinDebounce {
     private gpio: any;
     private pin: number;
     private pinState: number;
