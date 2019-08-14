@@ -13,6 +13,11 @@
  * GPIO reads are pushed to the microcontroller via subscriptions, so you can listen
  * for them without using CPU.
  *
+ * Note: If you cannot connect to your server, you might have restarted
+ *       your program to often by pressing Stop. This way destroy() is
+ *       not called and the connection is not closed gracefully.
+ *       The server will need some time to timeout.
+ *
  * Example on how to use:
  * 
 
