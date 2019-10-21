@@ -1,0 +1,21 @@
+Example using a native module
+
+
+Step 1: Make sure low_native_api directory is cloned:
+
+git submodule update --init
+
+
+Step 2: Compile the native module:
+
+make
+
+
+Step 3: Run low.js script:
+
+low src/index.js
+
+
+
+To see what is happening, take a look at src/index.js. It loads src/native.so which
+is compiled from src/native.c by the Makefile.

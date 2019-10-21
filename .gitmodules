@@ -1,0 +1,3 @@
+[submodule "native/low_native_api"]
+	path = native/low_native_api
+	url = https://www.github.com/neonious/low_native_api
