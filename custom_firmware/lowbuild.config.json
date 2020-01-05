@@ -1,0 +1,28 @@
+{
+  "lowjs": {
+  	"version": "20200105",
+  	"pro": true,
+  	"system_flash_size": 8388608,
+  	"ide_support": false,
+	"ota_update_support": true
+  },
+  "static_files": "file_system/",
+  "factory_files": null,
+  "modules": {},
+  "settings": {
+  	"code": {
+	    "main": "/server/index.js",
+  		"auto_restart_on_fatal": true,
+  		"console_kb": 0,
+  		"only_static_files": true
+  	},
+  	"wifi": {
+  		"ssid": "Custom Firmware Example",
+  		"password": "customfirmware"
+  	},
+  	"web": {
+  		"http_enabled": false,
+  		"https_enabled": false
+  	}
+  }
+}
