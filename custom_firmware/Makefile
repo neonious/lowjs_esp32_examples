@@ -1,11 +1,12 @@
 # You need to set the following parameters according to the documentation
 PRO_KEY=...
 
-FLASH_PORT=/dev/tty.usbserial-A5XK3RJT
+FLASH_PORT=...
 
+# Flashing is a lot faster with this setting
 # Only enable if you have a perfectly fine USB connection
-FLASH_BAUD=-b 921600
-#FLASH_BAUD=
+#FLASH_BAUD=-b 921600
+FLASH_BAUD=
 
 
 all: build
@@ -20,11 +21,11 @@ build-parts: clean
 	ln -s ../dist file_system/dist
 
 build: build-parts
-	node ~/Documents/Beruflich/neonious/Development/lowsync/build/ build --firmware-config=lowbuild.config.json firmware.dat
+	lowsync build --firmware-config=lowbuild.config.json firmware.dat
 
 # Flash firmware
 flash: build
-	node ~/Documents/Beruflich/neonious/Development/lowsync/build/ flash --init --firmware-file=firmware.dat --pro-key=$(PRO_KEY) --port=$(FLASH_PORT) $(FLASH_BAUD)
+	lowsync flash --init --firmware-file=firmware.dat --pro-key=$(PRO_KEY) --port=$(FLASH_PORT) $(FLASH_BAUD)
 
 # Run local test version
 run-test: build-parts

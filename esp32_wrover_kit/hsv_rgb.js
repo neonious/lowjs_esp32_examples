@@ -18,8 +18,8 @@ gpio.pins[0].setType(gpio.OUTPUT);  // red
 gpio.pins[2].setType(gpio.OUTPUT);  // green
 gpio.pins[4].setType(gpio.OUTPUT);  // blue
 
-var at = 0;
-var dist = 0;
+let at = 0;
+let dist = 0;
 
 function animate() {
   while (true) {
