@@ -1,4 +1,4 @@
-		Custom Firmware Example
+Custom Firmware Example
 
 
 This example shows how to
@@ -19,6 +19,8 @@ If you want to run this example without Over-The-Air updating, you can set the v
 With the key:
 
 - Install lowsync (see https://www.neonious.com/lowjs/examples/getting-started.html)
+
+- Call npm install
 
 - Set the two variables PRO_KEY and FLASH_PORT in the Makefile
 
