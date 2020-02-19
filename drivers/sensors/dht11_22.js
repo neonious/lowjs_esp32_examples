@@ -1,28 +1,25 @@
 'use strict';
 
 /*
- * A module to interface the DHT11 temperature + humidity module
- *
- * Should also work for DHT22, according to the Internet, you might have to divide
- * the results by 10 however.
+ * A module to interface the DHT11 or DHT22 temperature + humidity module
  *
  *
  * *** HOW TO CONNECT ***
  *
  * VCC (pin 1)        connect to 3.3 V
- * Data (pin 2)       connect to any GPIO pin of neonious one, add 5K resistor to 3.3 V
+ * Data (pin 2)       connect to any GPIO pin, add 5K resistor to 3.3 V
  * GND (pin 4)        connect to GND
  * 
  * Pin 3 of DHT11/DHT22 is an unused pin.
  * 
  * NOTE: Currently you must use pin 25 or pin 26 of neonious one, as the LPC822 pins
- *       do not seem accurate enough for the DHT11 yet. We will fix this soon!
+ *       do not seem accurate enough for the DHT11. On other boards, you can use any pin.
  *
  *
  * *** HOW TO USE ***
  *
- * const DHT11 = require('./dht11.js');
- * let sensor = new DHT11(7);
+ * const DHT11_22 = require('./dht11.js');
+ * let sensor = new DHT11_22(7, true);  // set to false for DHT11, true for DHT22
  * 
  * sensor.measure((err, temp, humidity) => {
  *     if(err)
@@ -37,13 +34,14 @@
 
 const gpio = require('gpio');
 
-class DHT11 {
+class DHT11_22 {
     /*
      * constructor
      * Sets up pins
      */
-    constructor(pinData) {
+    constructor(pinData, isDHT22) {
         this._pinData = pinData;
+        this._mult = isDHT22 ? 0.1 : 1 / 256;
 
         this._riseCB = (v) => { this._rise(v); }
         this._fallCB = (v) => { this._fall(v); }
@@ -87,7 +85,7 @@ class DHT11 {
         }, 3000);
         delete this._riseStamp;
 
-        this._n = 0;
+        this._n = undefined;    // wait for answer first
         this._temp = this._hum = this._check = 0;
 
         gpio.pins[this._pinData].setValue(0);
@@ -137,39 +135,44 @@ class DHT11 {
     _fall(stamp) {
         if(this._callback && this._riseStamp !== undefined) {
             let dur = stamp - this._riseStamp;
-            if(this._n != 0) {
-                if(dur >= 0.015 && dur <= 0.035) {
-                    if(this._n <= 16)
-                        this._hum = this._hum << 1;
-                    else if(this._n <= 32)
-                        this._temp = this._temp << 1;
-                    else
-                        this._check = this._check << 1;
-                }  else if(dur >= 0.06 && dur <= 0.08) {
-                    if(this._n <= 16)
-                        this._hum = (this._hum << 1) | 1;
-                    else if(this._n <= 32)
-                        this._temp = (this._temp << 1) | 1;
-                    else
-                        this._check = (this._check << 1) | 1;
-                } else {
-                    let cb = this._callback;
-
-                    delete this._callback;
-                    clearTimeout(this._timeout);
-
-                    if(this._againMS !== undefined)
-                        setTimeout(() => {
-                            this.measure(cb);
-                        }, this._againMS);
-                    cb(new Error("wrong signal"));
-                    return;
-                }
-            }
             delete this._riseStamp;
 
+            if(this._n === undefined) {
+                if(dur > 0.065 && dur < 0.1)      // module answered
+                    this._n = 0;
+                return;
+            }
+
             this._n++;
-            if(this._n == 41) {
+            if(dur >= 0.015 && dur <= 0.047) {
+                if(this._n <= 16)
+                    this._hum = this._hum << 1;
+                else if(this._n <= 32)
+                    this._temp = this._temp << 1;
+                else
+                    this._check = this._check << 1;
+            }  else if(dur <= 0.1) {
+                if(this._n <= 16)
+                    this._hum = (this._hum << 1) | 1;
+                else if(this._n <= 32)
+                    this._temp = (this._temp << 1) | 1;
+                else
+                    this._check = (this._check << 1) | 1;
+            } else {
+                let cb = this._callback;
+
+                delete this._callback;
+                clearTimeout(this._timeout);
+
+                if(this._againMS !== undefined)
+                    setTimeout(() => {
+                        this.measure(cb);
+                    }, this._againMS);
+                cb(new Error("wrong signal"));
+                return;
+            }
+
+            if(this._n == 40) {
                 let cb = this._callback;
 
                 delete this._callback;
@@ -186,11 +189,11 @@ class DHT11 {
                         this._temp = -(this._temp & 0x7FFF);
                     if(this._hum & 0x8000)
                         this._hum = -(this._hum & 0x7FFF);
-                    cb(null, this._temp / 256, this._hum / 256);
+                    cb(null, this._temp * this._mult, this._hum * this._mult);
                 }
             }
         }
     }
 }
 
-module.exports = DHT11;
+module.exports = DHT11_22;
