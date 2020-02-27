@@ -9,28 +9,32 @@
 
 let uart = require('uart');
 
-let pipe1 = new uart.UART({
-    pinRX: 13,
-    pinTX: 14
-});
-let pipe2 = new uart.UART({
+let pipeIn = new uart.UART({
     pinRX: 14,
     pinTX: 13
 });
+// Pipe out must be created after pipe in, because creating
+// pipe in later would set the pin mode wrong. Nothing to worry
+// about in real life, as nobody would use UART to simply loop
+// back on one pin...
+let pipeOut = new uart.UART({
+    pinRX: 13,
+    pinTX: 14
+});
 
-pipe1.setEncoding('utf8');
-pipe2.setEncoding('utf8');
+pipeOut.setEncoding('utf8');
+pipeIn.setEncoding('utf8');
 
 let txt = '';
-pipe2.on('data', (chunk) => {
+pipeIn.on('data', (chunk) => {
     txt += chunk;
 });
 
-pipe1.write('Hello world!');
+pipeOut.write('Hello world!');
 setTimeout(() => {
     console.log(txt);
 
     // Close application
-    pipe1.destroy();
-    pipe2.destroy();
+    pipeIn.destroy();
+    pipeOut.destroy();
 }, 1000);
