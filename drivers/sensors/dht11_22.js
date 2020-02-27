@@ -106,11 +106,11 @@ class DHT11_22 {
      *           check the datasheet for the minimum time between measurements
      *           (1000 ms for DHT11)
      */
-    start(callback, waitMS) {
+    start(callback, waitMS = 1000) {
         if(this._callback)
             throw new Error('already measuring');
 
-        this._againMS = waitMS === undefined ? 1000 : 0;
+        this._againMS = waitMS;
         this.measure(callback);
     }
 
